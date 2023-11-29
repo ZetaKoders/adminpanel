@@ -202,12 +202,12 @@ export default component$(() => {
 				<div class="flex items-center ml-auto space-x-2 sm:space-x-3">
 					
 
-      <button
-        class="bg-pink-500 transition-all duration-150 text-white active:bg-pink-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-        type="button"
-		onClick$={() => (state.showModal = !state.showModal)}      >
-        Open regular modal
-      </button>
+					<button
+						class="bg-pink-500 text-white active:bg-pink-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+						type="button"
+						onClick$={() => (state.showModal = !state.showModal)}      >
+						Open regular modal
+					</button>
       
 
 						<svg
@@ -243,16 +243,16 @@ export default component$(() => {
 	
 
 
-	<div class="flex flex-col">
-		<div class="overflow-x-auto z-10 ">
+	<div class="flex flex-col z-0 ">
+		<div class="overflow-x-auto flex-nowrap">
 			<div class="inline-block min-w-full align-middle">
 				<div class="overflow-hidden shadow">
 					<table
-						class="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-600"
+						class="min-w-full divide-y flex-nowrap divide-gray-200 table-fixed dark:divide-gray-600"
 					>
-						<thead class="bg-gray-100 dark:bg-gray-700">
+						<thead class="bg-gray-100 flex-nowrap dark:bg-gray-700">
 							<tr>
-								<th scope="col" class="p-4">
+								<th scope="col" class="p-4 ">
 									<div class="flex items-center">
 										<input
 											id="checkbox-all"
@@ -296,14 +296,14 @@ export default component$(() => {
 							</tr>
 						</thead>
 						<tbody
-							class="bg-white z-10 divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700"
+							class="bg-white flex-nowrap dark:bg-gray-800 dark:divide-gray-700"
 						>
 							{
 								alunosData.map((aluno) => (
 
 									//TODO: ADD KEY TO ITERATION
 									<div key={aluno.id.toString()}>
-										<tr class="hover:bg-gray-100 dark:hover:bg-gray-700">
+										<tr class="relative z-0 flex-row flex-nowrap hover:bg-gray-100 dark:hover:bg-gray-700">
 											<td class="w-4 p-4 ">
 												<div class="flex items-center">
 												<input
@@ -367,9 +367,9 @@ export default component$(() => {
 												</button>
 												<button
   													type="button"
- 													data-modal-target="delete-user-modal"
+ 													modal-target="modal"
  													
-													data-modal-toggle="delete-user-modal"
+													modal-toggle="modal"
  													class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900"
   onClick$={async () => {
     await update(aluno.id, aluno);
@@ -401,9 +401,10 @@ export default component$(() => {
 		</div>
 	</div>
 
-	{ state.showModal ? (
-        <div class="modal" id="modal">
-		<div class="justify-center items-center flex fixed inset-0 z-50 outline-none focus:outline-none">
+	<div
+  class={`modal fixed inset-0 z-50 ${state.showModal ? 'visible opacity-100' : 'invisible opacity-0'} transition-opacity duration-300`}
+  style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} // for overlay
+>		<div class="justify-center items-center flex fixed inset-0 z-50 outline-none focus:outline-none">
 			<div class="relative w-auto my-6 mx-auto max-w-3xl">
               {/*content*/}
               <div class="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
@@ -454,7 +455,6 @@ export default component$(() => {
           </div>
           <div class="opacity-25 fixed inset-0 z-40 bg-black" />
 		</div>
-      ) : null }
 
 
 </>
