@@ -1,1 +1,0 @@
-import{j as n}from"./q-9bb98aa7.js";import{A as i}from"./q-650288c1.js";import"./q-7440b369.js";const u=async c=>{const[o]=i(),t=await n(o,c);return t.success?{}:t.error.issues.reduce((s,e)=>{const a=e.path.join(".");return s[a]||(s[a]=e.message),s},{})};export{u as s_g3iC2s54jgU};
