@@ -3,11 +3,11 @@ import { object, string, boolean, email, minLength } from 'valibot';
 export type Aluno = {
 	course: string,
 	email: string,
-	firstTime: Boolean,
+	firstTime: boolean,
 	id: string,
 	locker: string,
 	name: string,
-	tel: string,
+	phone: string,
 	role: string,
 	img: string,
 }

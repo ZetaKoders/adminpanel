@@ -37,8 +37,9 @@ class AlunosData {
 
     get = async (id: string) => {
         try {
-            const result = await this.db.query<Aluno[]>(`SELECT * FROM aluno WHERE id = '${id}'`);
-            return result;
+            const result = await this.db.select<Aluno>(id);
+            console.log('result', result);
+            return result[0] as Aluno;
         } catch (error) {
             console.error(`Failed to fetch aluno with id ${id}:`, error);
             return {} as Aluno;

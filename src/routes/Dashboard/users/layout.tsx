@@ -1,42 +1,82 @@
-import { component$, createContextId, useStore} from '@builder.io/qwik';
-import { AddUserModal } from './layout';
+import { component$, $,useStore, useSignal, Slot, useTask$, useVisibleTask$ } from '@builder.io/qwik';
 import type { Aluno } from '~/models/types';
 import EmptyProfileAvatar from '~/assets/EmptyProfileAvatar.png';
-import { type RequestHandler, routeLoader$ } from '@builder.io/qwik-city';
+import {type  RequestHandler ,routeLoader$, useNavigate } from '@builder.io/qwik-city';
 import { AlunoData } from '~/services';
 
 
-export const onRequest: RequestHandler = async ({
-	sharedMap,
-}) => {
-	const alunos = await AlunoData.getAll();
-	sharedMap.set('alunos', alunos);
+
+
+export const onRequest: RequestHandler = async ({ sharedMap }) => {
+	const alunos: Aluno[] = await AlunoData.getAll();
+  if(alunos.length != 0) {
+	alunos.forEach((aluno) => {
+		sharedMap.set(`aluno:${aluno.id}`, aluno);
+	});
+  } else {
+    console.log("Failed to load alunos");
+  }
 };
 
 
-
-
-
-
 export const useAlunos = routeLoader$(({ sharedMap }) => {
-	return sharedMap.get('alunos') as Aluno[];
+	const users: Aluno[] = [];
+	for (const [key, value] of sharedMap.entries()) {
+		if (key.startsWith("aluno:")) {
+			const aluno = value as Aluno;
+				users.push(aluno);
+			
+		}
+	}
+	return users;
 });
+
+
 
 export default component$(() => {
-	const state = useStore({
-    alunosData: [] as Aluno[],
-    showModal: false
-});
+    const state = useStore({
+        alunosData: [] as Aluno[],
+        filteredAlunos: [] as Aluno[],
+        showModal: false,
+		searchTerm: '',
+		reload: false,
+    });
+	const nav = useNavigate();
+	const search = useSignal(state.searchTerm);
 
 
-const alunosData = useAlunos().value.flat();
+    // Fetch and store alunos data in state
+    const alunosData = useAlunos().value.flat();
+
+	useVisibleTask$(({track}) => {
+		track(search);
+		state.alunosData = alunosData;
+		state.filteredAlunos = state.alunosData.filter((aluno) => 
+		aluno.name.toLowerCase().includes(state.searchTerm) ||
+		aluno.phone.toLowerCase().includes(state.searchTerm) ||
+		aluno.email.toLowerCase().includes(state.searchTerm) ||
+		aluno.id.toString().includes(state.searchTerm)
+				
+		);
+
+	});
+
+
+	
+	// state.alunosData = alunosData;
+    // Search function
+
+	
+   
+
+
 return (
     <>
-
+	<section>
     <div
-    class="p-4 bg-white block z-10 sm:flex items-center justify-between border-b border-gray-200 lg:mt-1.5 dark:bg-gray-800 dark:border-gray-700">
-	
-		<div class="w-full mb-1">
+	id='table'
+    class="p-4 bg-white block overflow-hidden z-0 sm:flex items-center justify-between border-b border-gray-200 lg:mt-1.5 dark:bg-gray-800 dark:border-gray-700">
+		<div  class="w-full mb-1">
 			<div class="mb-4">
 			
 				<nav class="flex mb-5" aria-label="Breadcrumb">
@@ -107,13 +147,12 @@ return (
 					<form class="lg:pr-3" action="#" method="GET">
 						<label for="users-search" class="sr-only">Search</label>
 						<div class="relative mt-1 lg:w-64 xl:w-96">
-							<input
-								type="text"
-								name="email"
-								id="users-search"
-								class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-								placeholder="Search for users"
-							/>
+						<input 
+                type="text" 
+				value={state.searchTerm}
+				onChange$={(e) => state.searchTerm = e.target.value}
+				placeholder="Search for alunos..." 
+            />
 						</div>
 					</form>
 					<div class="flex pl-0 mt-3 space-x-1 sm:pl-2 sm:mt-0">
@@ -180,7 +219,11 @@ return (
 					<button
 						class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
 						type="button"
-						onClick$={() => (state.showModal = !state.showModal)} >	
+						onClick$={async () => {
+							state.showModal = true;
+							await nav(`/Dashboard/users/new`);
+						}}
+					>
 						<svg
 							class="w-5 h-5 mr-2 -ml-1"
 							fill="currentColor"
@@ -214,8 +257,8 @@ return (
 	
 
 
-	<div class="flex flex-col z-0 ">
-		<div class="overflow-x-auto flex-nowrap">
+	<div id='table body' class="flex flex-col z-0 ">
+		<div class="overflow-x-auto  flex-nowrap">
 			<div class="inline-block min-w-full align-middle">
 				<div class="overflow-hidden shadow">
 					<table
@@ -270,30 +313,26 @@ return (
 							class="bg-white flex-nowrap dark:bg-gray-800 dark:divide-gray-700"
 						>
 							{   
-
-								alunosData.map((aluno) => (
-
-									//TODO: ADD KEY TO ITERATION
+								state.filteredAlunos.map((aluno) => (
 									<div key={aluno.id}>
-										<tr class="relative z-0 flex-row flex-nowrap hover:bg-gray-100 dark:hover:bg-gray-700">
-											<td class="w-4 p-4 ">
+										<tr class="relative z-0 flex-row flex-nowrap hover:bg-gray-100 dark:hover:bg-gray-700" 
+													>
+											<td class="w-4 p-4">
 												<div class="flex items-center">
 												<input
 													id={`checkbox-${aluno.id}`}
 													aria-describedby={`checkbox-${aluno.id}`}
 													type="checkbox"
-  // ... other properties
 													/>
 														<label for={`checkbox-${aluno.id}`} class="sr-only">
-  checkbox
-</label>
-
+															checkbox
+														</label>
 												</div>
 											</td>
 											<td class="flex items-center p-4 mr-12 space-x-6 whitespace-nowrap">
-												{(aluno.img != null) ? (
+												{(aluno.img != '') ? (
 											<img class="w-10 h-10 rounded-full" src={`data:image/jpeg;base64,${aluno.img}`} alt={`${aluno.name} avatar`} width="300" height="200"/>
-												) : ( (aluno.img == '') ? <img class="w-10 h-10 rounded-full" src={EmptyProfileAvatar} alt={`${aluno.name} avatar`} width="300" height="200"/>
+												) : ( (aluno.img != null) ? <img class="w-10 h-10 rounded-full" src={EmptyProfileAvatar} alt={`${aluno.name} avatar`} width="300" height="200"/>
 											: <img class="w-10 h-10 rounded-full" src={EmptyProfileAvatar} alt={`${aluno.name} avatar`} width="300" height="200"/>)}
 												<div class="text-sm font-normal text-gray-500 dark:text-gray-400">
 													<div class="text-base font-semibold text-gray-900 dark:text-white">
@@ -319,6 +358,9 @@ return (
 													data-modal-target="edit-user-modal"
 													data-modal-toggle="edit-user-modal"
 													class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+													onClick$={async () => {
+														state.showModal = true;
+														await nav(`/Dashboard/users/${aluno.id.split(":")[1]}/`);}}
 												>
 													<svg
 														class="w-4 h-4 mr-2"
@@ -341,7 +383,8 @@ return (
 													type="button"
 													class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900"
 													onClick$={async () => {
-														}}
+														state.showModal = true;
+														await nav(`/Dashboard/users/${aluno.id.split(":")[1]}/`);}}
 													>
 													<svg
 														class="w-4 h-4 mr-2"
@@ -368,8 +411,8 @@ return (
 			</div>
 		</div>
 	</div>
-
-<div
+							</section>
+{/* <div
 class={`modal fixed inset-0 z-50 ${state.showModal ? 'visible opacity-100' : 'invisible opacity-0'} transition-opacity duration-300`}
 style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>		
 	<div class="justify-center items-center flex fixed inset-0 z-50 outline-none focus:outline-none">
@@ -385,18 +428,16 @@ style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
 						>
 						Close
 						</button>
-					</div>
-					<AddUserModal />
-					
+					</div>					
 				</div>
         </div>
     </div>
-<div class="opacity-25 fixed inset-0 z-40 bg-black" /></div>
+<div class="opacity-25 fixed inset-0 z-40 bg-black" /></div> */}
 
-<div
-class={`modal fixed inset-0 z-60 ${state.showModal ? 'visible opacity-100' : 'invisible opacity-0'} transition-opacity duration-300`}
+{/* <div
+class={`modal fixed overflow-hidden hidden inset-0 z-60 ${state.showModal ? 'visible opacity-100' : 'invisible opacity-0'} transition-opacity duration-300`}
 style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>		
-	<div class="justify-center items-center flex fixed inset-0 z-50 outline-none focus:outline-none">
+	<div class="justify-center items-center flex fixed inset-0 z-60 outline-none focus:outline-none">
 			<div class="relative w-auto my-6 mx-auto max-w-3xl">
 				<div class="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
 					<div class="flex justify-between items-center p-5 border-b border-solid border-blueGray-200 rounded-t">
@@ -410,11 +451,18 @@ style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
 						Close
 						</button>
 					</div>
-					<AddUserModal />
 					
 				</div>
         </div>
     </div>
-<div class="opacity-25 fixed inset-0 z-40 bg-black" /></div>
-</>
+</div> */}
+
+
+	<div class="z-20"><Slot /></div>
+	
+
+				
+
+</>	
 )});
+
