@@ -10,8 +10,8 @@ import type { InitialValues, SubmitHandler } from '@modular-forms/qwik';
 import { formAction$, useForm, valiForm$ } from '@modular-forms/qwik';
 import { Surreal } from 'surrealdb.js';
 import { email, type Input, minLength, object, string } from 'valibot';
-import type { Aluno } from '~/models/types';
-import { AlunoData } from '~/services';
+import type { Aluno, evento } from '~/models/types';
+import { AlunoData, EventoData } from '~/services';
 
 export const useUser = routeLoader$(({ sharedMap }) => {
   const users: Aluno[] = [];
@@ -25,7 +25,7 @@ export const useUser = routeLoader$(({ sharedMap }) => {
 });
 
 
-export const updateAlunoData = async (LoginForm: AddUserSchema, register: boolean ) => {
+export const updateAlunoData = async (LoginForm: EventSchema, register: boolean ) => {
 
 
   try {
@@ -73,7 +73,7 @@ export const updateAlunoData = async (LoginForm: AddUserSchema, register: boolea
 };
 
 //TODO: make a conditional on firstTime
-const convertToAluno = (validatedData: AddUserSchema): Aluno => {
+const convertToAluno = (validatedData: EventSchema): Aluno => {
   console.log('Aluno converted', validatedData);
 
   return {
@@ -85,11 +85,11 @@ const convertToAluno = (validatedData: AddUserSchema): Aluno => {
     phone: validatedData.phone,
     name: validatedData.name,
     firstTime: true,
-    img: ''
+    img: '',  //TODO: KEEP IMAGE
   };
 };
 
-const AddUserSchema = object({
+const EventSchema = object({
   email: string([
     minLength(1, 'Please enter the student institutional email.'),
     email('The email address is badly formatted.'),
@@ -111,30 +111,19 @@ name: string([
 ]),
 });
 
-type AddUserSchema = Input<typeof AddUserSchema>;
-
-  // export const useFormLoader = routeLoader$<InitialValues<AddUserSchema>>(() => ({
-  //   // Return the initial values for the form
-  //   email: "",
-  //   id: "",
-  //   course: "",
-  //   role: "",
-  //   locker: "",
-  //   tel: "",
-  //   name: "",
-  
- 
-  // }));
+type EventSchema = Input<typeof EventSchema>;
 
 
-  export const useFormLoader = routeLoader$<InitialValues<AddUserSchema>>(async (requestEvent) => {
+
+
+  export const useFormLoader = routeLoader$<InitialValues<EventSchema>>(async (requestEvent) => {
     // Await the result of useAlunos
     console.log('requestEvent:', requestEvent.params.UserId);
 
 
 
-    const aluno: Aluno = await AlunoData.get(`aluno:${requestEvent.params.UserId}`) as Aluno;
-    if(aluno == null){
+    const event: evento  = await EventoData.get(`event:${requestEvent.params.EventId}`) as evento;
+    if(event == null){
       return {
         // Return the initial values for the form
         email: "",
@@ -148,46 +137,46 @@ type AddUserSchema = Input<typeof AddUserSchema>;
     }
     return {
       // Return the initial values for the form
-      email: aluno.email,
-      id: aluno.id,
-      course: aluno.course,
-      role: aluno.role,
-      locker: aluno.locker,
-      phone: aluno.phone,
-      name: aluno.name,
+      email: event.email,
+      id: event.id,
+      course: event.course,
+      role: event.role,
+      locker: event.locker,
+      phone: event.phone,
+      name: event.name,
     }
   });
 
 
 
 // Define the form action using formAction$
-const addUserFormAction = formAction$<AddUserSchema>((values) => {
+const addUserFormAction = formAction$<EventSchema>((values) => {
 
   console.log('Form submitted with:', values);
 
-}, valiForm$(AddUserSchema));
+}, valiForm$(EventSchema));
 
 export default component$(() => {
     const loc = useLocation();
-    const userId: string = loc.params.UserId;
+    const EventId: string = loc.params.EventId;
     const nav = useNavigate();
-    console.log('userId:', userId);
+    console.log('userId:', EventId);
 
 
 
 
 
 
-  const [AddUserForm, { Form, Field }] = useForm<AddUserSchema>({
+  const [AddUserForm, { Form, Field }] = useForm<EventSchema>({
     loader: useFormLoader(),
     action: addUserFormAction(), // Ensure this is correctly defined elsewhere
-    validate: valiForm$(AddUserSchema),
+    validate: valiForm$(EventSchema),
     
   });
 
-  const handleSubmit: QRL<SubmitHandler<AddUserSchema>> = $((values) => {
+  const handleSubmit: QRL<SubmitHandler<EventSchema>> = $((values) => {
     let register = false
-  if(userId === 'new'){ 
+  if(EventId === 'new'){ 
    register = true
     } 
       updateAlunoData(values, register)
@@ -213,7 +202,7 @@ export default component$(() => {
 			<div class=" w-full h-full max-w-2xl px-4 md:h-auto">
 				<div class=" bg-white rounded-lg shadow dark:bg-gray-800">
           <div class="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700">
-            {(userId === 'new')?
+            {(EventId === 'new')?
             <p class="text-xl font-semibold  text-gray-800 dark:text-white">Add User</p>
             :<p class="text-xl font-semibold  text-gray-800 dark:text-white">Edit User</p>
             }
@@ -321,7 +310,7 @@ export default component$(() => {
                   <Field name="phone">
         {(field, props) => (
           <div>
-            <input {...props} type="tel" value={field.value}
+            <input {...props} type="name" value={field.value}
             class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"/>
 
             {field.error && <div>{field.error}</div>}

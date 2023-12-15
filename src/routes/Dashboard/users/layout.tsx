@@ -1,8 +1,9 @@
-import { component$, $,useStore, useSignal, Slot, useTask$, useVisibleTask$ } from '@builder.io/qwik';
+import { component$, useStore, useSignal, Slot,  useVisibleTask$, useResource$, useTask$ } from '@builder.io/qwik';
 import type { Aluno } from '~/models/types';
 import EmptyProfileAvatar from '~/assets/EmptyProfileAvatar.png';
 import {type  RequestHandler ,routeLoader$, useNavigate } from '@builder.io/qwik-city';
 import { AlunoData } from '~/services';
+import { Surreal } from 'surrealdb.js';
 
 
 
@@ -37,48 +38,72 @@ export default component$(() => {
     const state = useStore({
         alunosData: [] as Aluno[],
         filteredAlunos: [] as Aluno[],
-        showModal: false,
+        showDeleteModal: false,
 		searchTerm: '',
-		reload: false,
+		itemsPerPage: 7,
+		currentItems: [] as Aluno[],
+		totalPages: 0,
     });
+
+
+	
+	// const alunosARRAY = useResource$(async ({ track }) => {
+	// 	track(search);
+
+	// 	const db = new Surreal();
+	// 	await db.connect('wss://surreal.orizuro.eu/rpc', {
+	// 	namespace: 'teste',
+	// 	database: 'testeadmin',
+	// 	auth: {
+	// 		username: 'admin',
+	// 		password: 'admin',
+	// 	},
+	// 	});
+	// 	console.log("ssds")
+
+	// 	const alunos: Aluno[] = (await db.query(`SELECT * FROM aluno WHERE phone CONTAINS '${search.value}' `));
+	// 	console.log(alunos);
+	// 	return alunos;
+	// });
+
+
 	const nav = useNavigate();
-	const search = useSignal(state.searchTerm);
-
-
+	const search = useSignal('');
+	const userId = useSignal('');
+	const currentPage = useSignal(1);
+	
     // Fetch and store alunos data in state
-    const alunosData = useAlunos().value.flat();
 
-	useVisibleTask$(({track}) => {
-		track(search);
+	const alunosData = useAlunos().value.flat();
+
+	useVisibleTask$(({ track }) => {
+		track(currentPage);
 		state.alunosData = alunosData;
-		state.filteredAlunos = state.alunosData.filter((aluno) => 
-		aluno.name.toLowerCase().includes(state.searchTerm) ||
-		aluno.phone.toLowerCase().includes(state.searchTerm) ||
-		aluno.email.toLowerCase().includes(state.searchTerm) ||
-		aluno.id.toString().includes(state.searchTerm)
-				
-		);
-
+		const indexOfLastItem = currentPage.value * state.itemsPerPage;
+	const indexOfFirstItem = indexOfLastItem - state.itemsPerPage;
+	state.filteredAlunos = state.alunosData.slice(indexOfFirstItem, indexOfLastItem);
+	state.totalPages = Math.ceil(state.alunosData.length / state.itemsPerPage);
 	});
+
+
 
 
 	
 	// state.alunosData = alunosData;
     // Search function
 
-	
+
    
 
 
 return (
     <>
-	<section>
     <div
 	id='table'
-    class="p-4 bg-white block overflow-hidden z-0 sm:flex items-center justify-between border-b border-gray-200 lg:mt-1.5 dark:bg-gray-800 dark:border-gray-700">
+    class="p-4 shadow bg-white block overflow-hidden  z-0 sm:flex items-center justify-between border-b border-gray-200 lg:mt-1.5 dark:bg-gray-800 dark:border-gray-700">
 		<div  class="w-full mb-1">
 			<div class="mb-4">
-			
+{/* 			
 				<nav class="flex mb-5" aria-label="Breadcrumb">
 					<ol
 						class="inline-flex items-center space-x-1 text-sm font-medium md:space-x-2"
@@ -133,7 +158,7 @@ return (
 							</div>
 						</li>
 					</ol>
-				</nav>
+				</nav> */}
 				<h1
 					class="text-xl font-semibold text-gray-900 sm:text-2xl dark:text-white"
 				>
@@ -149,8 +174,10 @@ return (
 						<div class="relative mt-1 lg:w-64 xl:w-96">
 						<input 
                 type="text" 
-				value={state.searchTerm}
-				onChange$={(e) => state.searchTerm = e.target.value}
+				value={search.value}
+				class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+
+				onChange$={(e) => console.log(e.target.value)}
 				placeholder="Search for alunos..." 
             />
 						</div>
@@ -220,7 +247,6 @@ return (
 						class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
 						type="button"
 						onClick$={async () => {
-							state.showModal = true;
 							await nav(`/Dashboard/users/new`);
 						}}
 					>
@@ -257,79 +283,45 @@ return (
 	
 
 
-	<div id='table body' class="flex flex-col z-0 ">
-		<div class="overflow-x-auto  flex-nowrap">
-			<div class="inline-block min-w-full align-middle">
-				<div class="overflow-hidden shadow">
-					<table
-						class="min-w-full divide-y flex-nowrap divide-gray-200 table-fixed dark:divide-gray-600"
-					>
-						<thead class="bg-gray-100 flex-nowrap dark:bg-gray-700">
-							<tr>
-								<th scope="col" class="p-4 ">
-									<div class="flex items-center">
-										<input
-											id="checkbox-all"
-											aria-describedby="checkbox-1"
-											type="checkbox"
-											class="w-4 h-4 border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"
-										/>
-										<label for="checkbox-all" class="sr-only">checkbox</label>
-									</div>
-								</th>
-								<th
-									scope="col"
-									class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
-								>
-									Name
-								</th>
-								<th
-									scope="col"
-									class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
-								>
-									Course
-								</th>
-								<th
-									scope="col"
-									class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
-								>
-									Role
-								</th>
-								<th
-									scope="col"
-									class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
-								>
-									Phone Number
-								</th>
-								<th
-									scope="col"
-									class="p-4 text-xs font-medium text-left text-gray-500 uppercase dark:text-gray-400"
-								>
-									Actions
-								</th>
-							</tr>
-						</thead>
-						<tbody
-							class="bg-white flex-nowrap dark:bg-gray-800 dark:divide-gray-700"
-						>
-							{   
-								state.filteredAlunos.map((aluno) => (
-									<div key={aluno.id}>
-										<tr class="relative z-0 flex-row flex-nowrap hover:bg-gray-100 dark:hover:bg-gray-700" 
-													>
-											<td class="w-4 p-4">
-												<div class="flex items-center">
-												<input
-													id={`checkbox-${aluno.id}`}
-													aria-describedby={`checkbox-${aluno.id}`}
-													type="checkbox"
-													/>
-														<label for={`checkbox-${aluno.id}`} class="sr-only">
-															checkbox
-														</label>
-												</div>
-											</td>
-											<td class="flex items-center p-4 mr-12 space-x-6 whitespace-nowrap">
+	<div class="flex flex-col">
+  <div class="overflow-x-auto">
+    <div class="inline-block min-w-full align-middle">
+      <div class=" shadow">
+					<table class="min-w-full divide-y divide-gray-200 table-fixed dark:divide-gray-600">
+    <thead class="bg-gray-100 dark:bg-gray-700">
+        <tr>
+            <th scope="col" class="p-4">
+                <div class="flex items-center">
+                    <input
+                        id="checkbox-all"
+                        type="checkbox"
+                        class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"
+                    />
+                    <label for="checkbox-all" class="sr-only">checkbox</label>
+                </div>
+            </th>
+            <th scope="col" class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Name</th>
+            <th scope="col" class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Course</th>
+            <th scope="col" class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Role</th>
+            <th scope="col" class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Mobile</th>
+            <th scope="col" class="p-4 text-left text-xs font-medium uppercase text-gray-500 dark:text-gray-400">Actions</th>
+        </tr>
+    </thead>
+    <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+        {state.filteredAlunos.map((aluno) => (
+            <tr key={aluno.id} class="hover:bg-gray-100 dark:hover:bg-gray-700">
+                <td class="w-4 p-4">
+                    <div class="flex items-center">
+                        <input
+                            id={`checkbox-${aluno.id}`}
+                            aria-describedby={`checkbox-${aluno.id}`}
+                            type="checkbox"
+                            class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-300 dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700 dark:border-gray-600"
+                        />
+                        <label for={`checkbox-${aluno.id}`} class="sr-only">checkbox</label>
+                    </div>
+                </td>
+				<td class="flex items-center p-4 mr-12 space-x-6 whitespace-nowrap">
 												{(aluno.img != '') ? (
 											<img class="w-10 h-10 rounded-full" src={`data:image/jpeg;base64,${aluno.img}`} alt={`${aluno.name} avatar`} width="300" height="200"/>
 												) : ( (aluno.img != null) ? <img class="w-10 h-10 rounded-full" src={EmptyProfileAvatar} alt={`${aluno.name} avatar`} width="300" height="200"/>
@@ -343,26 +335,18 @@ return (
 													</div>
 												</div>
 											</td>
-											<td class="max-w-sm p-4 overflow-hidden text-base font-normal text-gray-500 truncate xl:max-w-xs dark:text-gray-400">
-												{aluno.course}
-											</td>
-											<td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">
-												{aluno.role}
-											</td>
-											<td class="p-4 text-base font-medium text-gray-900 whitespace-nowrap dark:text-white">
-												{aluno.phone}
-											</td>
-											<td class="p-4 space-x-2 whitespace-nowrap">
-												<button
-													type="button"
-													data-modal-target="edit-user-modal"
-													data-modal-toggle="edit-user-modal"
-													class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
-													onClick$={async () => {
-														state.showModal = true;
-														await nav(`/Dashboard/users/${aluno.id.split(":")[1]}/`);}}
-												>
-													<svg
+				<td class="p-4 text-sm font-normal text-gray-500 dark:text-gray-400">{aluno.course}</td>
+                <td class="p-4 text-sm font-normal text-gray-500 dark:text-gray-400">{aluno.role}</td>
+                <td class="p-4 text-sm font-medium text-gray-900 dark:text-white">{aluno.phone}</td>
+                <td class="p-4 space-x-2 whitespace-nowrap">
+                    <button
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                        onClick$={async () => {
+                            await nav(`/Dashboard/users/${aluno.id.split(":")[1]}/`);
+                        }}
+                    >
+						<svg
 														class="w-4 h-4 mr-2"
 														fill="currentColor"
 														viewBox="0 0 20 20"
@@ -377,16 +361,17 @@ return (
 															/>
 														</>
 													</svg>
-													Edit user
-												</button>
-												<button
-													type="button"
-													class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900"
-													onClick$={async () => {
-														state.showModal = true;
-														await nav(`/Dashboard/users/${aluno.id.split(":")[1]}/`);}}
-													>
-													<svg
+													Edit User
+                    </button>
+                    <button
+                        type="button"
+                        class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-red-600 rounded-lg hover:bg-red-800 focus:ring-4 focus:ring-red-300 dark:focus:ring-red-900"
+                        onClick$={async () => {
+                            state.showDeleteModal = true;
+                            userId.value = aluno.id;
+                        }}
+                    >
+                       <svg
 														class="w-4 h-4 mr-2"
 														fill="currentColor"
 														viewBox="0 0 20 20"
@@ -398,67 +383,119 @@ return (
 															clip-rule="evenodd"
 														/>
 													</svg>
-													Delete user
-												</button>
-											</td>
-										</tr>
-									</div>
-								))
-							}
-						</tbody>
-					</table>
+													Delete User
+                    </button>
+                </td>
+            </tr>
+        ))}
+    </tbody>
+	
+
+</table>
+<div class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+  <div class="flex justify-between items-center p-4">
+    <button 
+      onClick$={() => currentPage.value--} 
+      disabled={currentPage.value === 1}
+      class="px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-blue-300"
+    >
+      Previous
+    </button>
+    <span class="text-sm text-gray-900 dark:text-white">
+      Page {currentPage.value} of {state.totalPages}
+    </span>
+    <button 
+      onClick$={() => currentPage.value++} 
+      disabled={currentPage.value === state.totalPages}
+      class="px-4 py-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600 disabled:bg-blue-300"
+    >
+      Next
+    </button>
+  </div>
+</div>
+
 				</div>
 			</div>
 		</div>
 	</div>
-							</section>
-{/* <div
-class={`modal fixed inset-0 z-50 ${state.showModal ? 'visible opacity-100' : 'invisible opacity-0'} transition-opacity duration-300`}
+	
+<div
+class={`modal fixed inset-0 z-50 ${state.showDeleteModal ? 'visible opacity-100' : 'invisible opacity-0'} transition-opacity duration-300`}
 style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>		
-	<div class="justify-center items-center flex fixed inset-0 z-50 outline-none focus:outline-none">
-			<div class="relative w-auto my-6 mx-auto max-w-3xl">
-				<div class="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
-					<div class="flex justify-between items-center p-5 border-b border-solid border-blueGray-200 rounded-t">
-						<h3 class="text-3xl self-center font-semibold flex-grow text-center">
-							Add User to Database
-						</h3>
-						<button
-							class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-						onClick$={() => state.showModal = false}
+    <div class="absolute inset-0 px-2  flex items-center  justify-center">
+			<div class="relative bg-white rounded-lg shadow dark:bg-gray-800">
+				<div class="flex justify-end p-2">
+					<button
+						type="button"
+						class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-700 dark:hover:text-white"
+						data-modal-toggle="delete-user-modal"
+						onClick$={() => {
+							state.showDeleteModal = false;
+							userId.value = '';
+						}
+						}
+					>
+						<svg
+							class="w-5 h-5"
+							fill="currentColor"
+							viewBox="0 0 20 20"
+							xmlns="http://www.w3.org/2000/svg"
+							><path
+								fill-rule="evenodd"
+								d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+								clip-rule="evenodd"></path></svg
 						>
-						Close
-						</button>
-					</div>					
+					</button>
 				</div>
-        </div>
-    </div>
-<div class="opacity-25 fixed inset-0 z-40 bg-black" /></div> */}
+				<div class="p-6 pt-0 text-center">
+					<svg
+						class="w-16 h-16 mx-auto text-red-600"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg"
+						><path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg
+					>
+					<h3 class="mt-5 mb-6 text-lg text-gray-500 dark:text-gray-400">
+						Are you sure you want to delete this user?
+					</h3>
+					<a
+						href="#"
+						class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-base inline-flex items-center px-3 py-2.5 text-center mr-2 dark:focus:ring-red-800"
+						onClick$={async () => {
+							const result = AlunoData.delete(userId.value);
+							console.log(result);
+							userId.value = '';
+							state.showDeleteModal = false;
+							
+						}}>
+						Yes, I'm sure
+					</a>
+					<a
+						href="#"
+						class="text-gray-900 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-primary-300 border border-gray-200 font-medium inline-flex items-center rounded-lg text-base px-3 py-2.5 text-center dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-gray-700"
+						data-modal-toggle="delete-user-modal"
+					>
+						No, cancel
+					</a>
+				</div>
+			</div>
+	</div>
+</div>
 
-{/* <div
-class={`modal fixed overflow-hidden hidden inset-0 z-60 ${state.showModal ? 'visible opacity-100' : 'invisible opacity-0'} transition-opacity duration-300`}
+<div
+class={`modal fixed overflow-hidden hidden inset-0 z-30 ${state.showDeleteModal ? 'visible opacity-100' : 'invisible opacity-0'} transition-opacity duration-300`}
 style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>		
-	<div class="justify-center items-center flex fixed inset-0 z-60 outline-none focus:outline-none">
-			<div class="relative w-auto my-6 mx-auto max-w-3xl">
-				<div class="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
-					<div class="flex justify-between items-center p-5 border-b border-solid border-blueGray-200 rounded-t">
-						<h3 class="text-3xl self-center font-semibold flex-grow text-center">
-							Add Student to Database
-						</h3>
-						<button
-							class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
-						onClick$={() => state.showModal = false}
-						>
-						Close
-						</button>
-					</div>
-					
-				</div>
-        </div>
-    </div>
-</div> */}
+</div>
 
-
-	<div class="z-20"><Slot /></div>
+<section>
+<div class="z-20"><Slot /></div>
+</section>
+	
 	
 
 				

@@ -13,14 +13,17 @@ export type Aluno = {
 }
 
 export type evento = {
-    description: String,
-    id: String,
-    img: String ,
-    local: String,
-    name: String,
-    qrData: String,
-    timeEnd: String,
-    timeStart: String,
+    description: string,
+    id: string,
+    img: string ,
+    local: string,
+    name: string,
+    category: string,
+    timeEnd: Date,
+    timeStart: Date,
+	isPrivate: boolean,
+	price: number,
+	quantity: number,
 
 }
 

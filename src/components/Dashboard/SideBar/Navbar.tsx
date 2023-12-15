@@ -43,7 +43,7 @@ return (
 				<a href="/" class="flex ml-2 md:mr-24">
 					<span
 						class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white"
-						>Krumena | Services</span
+						>AE|WALLET - Services</span
 					>
 				</a>
 
@@ -126,7 +126,7 @@ return (
 					>
 				</button>
 				<div
-					class="z-20 z-50 hidden max-w-sm my-4 overflow-hidden text-base list-none bg-white divide-y divide-gray-100 rounded shadow-lg dark:divide-gray-600 dark:bg-gray-700"
+					class="z-20  hidden max-w-sm my-4 overflow-hidden text-base list-none bg-white divide-y divide-gray-100 rounded shadow-lg dark:divide-gray-600 dark:bg-gray-700"
 					id="notification-dropdown"
 				>
 					<div
@@ -380,7 +380,7 @@ return (
 					>
 				</button>
 				<div
-					class="z-20 z-50 hidden max-w-sm my-4 overflow-hidden text-base list-none bg-white divide-y divide-gray-100 rounded shadow-lg dark:bg-gray-700 dark:divide-gray-600"
+					class="z-20  hidden max-w-sm my-4 overflow-hidden text-base list-none bg-white divide-y divide-gray-100 rounded shadow-lg dark:bg-gray-700 dark:divide-gray-600"
 					id="apps-dropdown"
 				>
 					<div
@@ -570,11 +570,11 @@ return (
 							data-dropdown-toggle="dropdown-2"
 						>
 							<span class="sr-only">Open user menu</span>
-							<img
+							{/* <img
 								class="w-8 h-8 rounded-full"
 								src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
 								alt="user photo"
-							/>
+							/> */}
 						</button>
 					</div>
 					<div

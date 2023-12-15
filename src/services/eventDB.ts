@@ -1,7 +1,7 @@
 import { Surreal } from 'surrealdb.js';
-import type { Aluno } from '~/models/types';
+import type {evento} from '~/models/types';
 
-class AlunosData {
+class EventData {
     private db: Surreal;
 
     constructor() {
@@ -26,41 +26,41 @@ class AlunosData {
 
     getAll = async () => {
         try {
-            const result = await this.db.query<Aluno[]>('SELECT * FROM aluno');
+            const result = await this.db.query<evento[]>('SELECT * FROM event');
             console.log('result', result);
             return result;
         } catch (error) {
-            console.error('Failed to fetch alunos:', error);
+            console.error('Failed to fetch eventos:', error);
             return [];
         }
     }
 
     get = async (id: string) => {
         try {
-            const result = await this.db.select<Aluno>(id);
+            const result = await this.db.select<evento>(id);
             console.log('result', result);
-            return result[0] as Aluno;
+            return result[0] as evento;
         } catch (error) {
             console.error(`Failed to fetch aluno with id ${id}:`, error);
-            return {} as Aluno;
+            return {} as evento;
         }
     }
 
-    create = async (aluno: Aluno) => {
+    create = async (evento: evento) => {
         try {
-            const result = await this.db.insert<Aluno>('aluno', aluno);
+            const result = await this.db.insert<evento>('event', evento);
             return result;
         } catch (error) {
-            console.error('Failed to create aluno:', error);
+            console.error('Failed to create evento:', error);
         }
     }
 
-    update = async (aluno: Aluno) => {
+    update = async (evento: evento) => {
         try {
-            const result = await this.db.update<Aluno>('aluno', aluno);
+            const result = await this.db.update<evento>('event', evento);
             return result;
         } catch (error) {
-            console.error(`Failed to update aluno with id ${aluno.id}:`, error);
+            console.error(`Failed to update evento with id ${evento.id}:`, error);
         }
     }
 
@@ -69,11 +69,10 @@ class AlunosData {
             const result = await this.db.query(`DELETE '${id}'`);
             return result;
         } catch (error) {
-            console.error(`Failed to delete aluno with id ${id}:`, error);
+            console.error(`Failed to delete evento with id ${id}:`, error);
         }
     }
 }
 
-const AlunoData = new AlunosData();
-export { AlunoData };
-
+const EventoData = new EventData();
+export { EventoData };

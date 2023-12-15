@@ -70,12 +70,12 @@ return (
 									d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z"
 								></path>
 							</svg>
-							<span class="ml-3" sidebar-toggle-item>Welcome</span>
+							<span class="ml-3" sidebar-toggle-item>Welcome: Not Implemented</span>
 						</a>
 					</li>
 					<li>
 						<a
-							href={''}
+							href={'/'}
 							class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700"
 						>
 							<svg
@@ -86,10 +86,10 @@ return (
 								><path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path><path
 									d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path></svg
 							>
-							<span class="ml-3" sidebar-toggle-item>Dashboard</span>
+							<span class="ml-3" sidebar-toggle-item>Dashboard: Statistics - not implemented</span>
 						</a>
 					</li>
-					<li>
+					{/* <li>
 						<button
 							type="button"
 							class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -139,8 +139,9 @@ return (
 								>
 							</li>
 						</ul>
-					</li>
+					</li> */}
 					<li>
+						
 						<button
 							type="button"
 							class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -177,10 +178,8 @@ return (
 							>
 						</button>
 						<ul id="dropdown-crud" class="hidden space-y-2 py-2">
-							{/* <!-- if not (eq .Params.group crud) }}hidden {{ end }} --> */}
 							<li>
-								{/* <!-- {{ if eq $page_slug "products" }} -->
-								<!-- bg-gray-100 dark:bg-gray-700 --> */}
+								
 								<a
 									href={''}
 									class="text-base text-gray-900 rounded-lg flex items-center p-2 group hover:bg-gray-100 transition duration-75 pl-11 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -188,8 +187,7 @@ return (
 								>
 							</li>
 							<li>
-								{/* <!--  {{ if eq $page_slug "users" }} -->
-								<!-- bg-gray-100 dark:bg-gray-700 --> */}
+								
 								<a
 									href={''}
 									class="text-base text-gray-900 rounded-lg flex items-center p-2 group hover:bg-gray-100 transition duration-75 pl-11 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -198,8 +196,7 @@ return (
 							</li>
 						</ul>
 					</li>
-					<li>
-						{/* <!-- {{ if eq $page_slug "settings" }} --> */}
+					{/* <li>
 						<a
 							href={''}
 							class="flex items-center p-2 text-base text-gray-900 rounded-lg hover:bg-gray-100 group dark:text-gray-200 dark:hover:bg-gray-700"
@@ -219,8 +216,8 @@ return (
 							</svg>
 							<span class="ml-3" sidebar-toggle-item>Settings</span>
 						</a>
-					</li>
-					<li>
+					</li> */}
+					{/* <li>
 						<button
 							type="button"
 							class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -283,8 +280,8 @@ return (
 								>
 							</li>
 						</ul>
-					</li>
-					<li>
+					</li> */}
+					{/* <li>
 						<button
 							type="button"
 							class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -353,8 +350,8 @@ return (
 								>
 							</li>
 						</ul>
-					</li>
-					<li>
+					</li> */}
+					{/* <li>
 						<button
 							type="button"
 							class="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
@@ -390,40 +387,10 @@ return (
 									clip-rule="evenodd"></path></svg
 							>
 						</button>
-						{/* <!--  {{ if not (eq .Params.group "playground") }}hidden {{ end }} --> */}
-						<ul id="dropdown-playground" class="hidden space-y-2 py-2">
-							<li>
-								{/* <!-- {{ if eq $page_slug "stacked" }} -->
-								<!--  bg-gray-100 dark:bg-gray-700 --> */}
-								<a
-									href={''}
-									class="text-base text-gray-900 rounded-lg flex items-center p-2 group hover:bg-gray-100 transition duration-75 pl-11 dark:text-gray-200 dark:hover:bg-gray-700"
-									>Stacked</a
-								>
-								{/* <!-- <a
-									href={url('playground/kitchen-sink')}
-									class="text-base text-gray-900 rounded-lg flex items-center p-2 group hover:bg-gray-100 transition duration-75 pl-11 dark:text-gray-200 dark:hover:bg-gray-700"
-									>Kitchen Sink</a
-								> --> */}
-							</li>
-							<li>
-								{/* <!-- {{ if eq $page_slug "sidebar" }} -->
-								<!--  bg-gray-100 dark:bg-gray-700 --> */}
-								<a
-									href={''}
-									class="text-base text-gray-900 rounded-lg flex items-center p-2 group hover:bg-gray-100 transition duration-75 pl-11 dark:text-gray-200 dark:hover:bg-gray-700"
-									>Sidebar</a
-								>
-								<a
-									href={''}
-									class="text-base text-gray-900 rounded-lg flex items-center p-2 group hover:bg-gray-100 transition duration-75 pl-11 dark:text-gray-200 dark:hover:bg-gray-700"
-									>API data</a
-								>
-							</li>
-						</ul>
-					</li>
+						
+					</li> */}
 				</ul>
-				<div class="pt-2 space-y-2">
+				{/* <div class="pt-2 space-y-2">
 					<a
 						href={'https://github.com/themesberg/flowbite-astro-admin-dashboard'}
 						target="_blank"
@@ -490,7 +457,7 @@ return (
 						>
 						<span class="ml-3" sidebar-toggle-item>Support</span>
 					</a>
-				</div>
+				</div> */}
 			</div>
 		</div>
 		<div
