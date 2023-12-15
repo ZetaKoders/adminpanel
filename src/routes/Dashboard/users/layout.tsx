@@ -40,7 +40,7 @@ export default component$(() => {
         filteredAlunos: [] as Aluno[],
         showDeleteModal: false,
 		searchTerm: '',
-		itemsPerPage: 7,
+		itemsPerPage: 8,
 		currentItems: [] as Aluno[],
 		totalPages: 0,
     });
@@ -94,6 +94,8 @@ export default component$(() => {
 
 
    
+
+44
 
 
 return (

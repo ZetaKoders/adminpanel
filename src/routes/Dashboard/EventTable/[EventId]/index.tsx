@@ -9,7 +9,7 @@ import { routeLoader$ } from '@builder.io/qwik-city';
 import type { InitialValues, SubmitHandler } from '@modular-forms/qwik';
 import { formAction$, useForm, valiForm$ } from '@modular-forms/qwik';
 import { Surreal } from 'surrealdb.js';
-import { email, type Input, minLength, object, string } from 'valibot';
+import { email, type Input, minLength, object, string, date, number } from 'valibot';
 import type { Aluno, evento } from '~/models/types';
 import { AlunoData, EventoData } from '~/services';
 
@@ -73,42 +73,40 @@ export const updateAlunoData = async (LoginForm: EventSchema, register: boolean 
 };
 
 //TODO: make a conditional on firstTime
-const convertToAluno = (validatedData: EventSchema): Aluno => {
+const convertToAluno = (validatedData: EventSchema): evento => {
   console.log('Aluno converted', validatedData);
 
   return {
-    email: validatedData.email,
+    description: validatedData.description,
     id: validatedData.id,
-    course: validatedData.course,
-    role: validatedData.role || '--', // Assuming role and locker can be empty
-    locker: validatedData.locker || '--',
-    phone: validatedData.phone,
+    local: validatedData.local,
     name: validatedData.name,
-    firstTime: true,
-    img: '',  //TODO: KEEP IMAGE
+    category: validatedData.category,
+    timeEnd: validatedData.timeEnd,
+    timeStart: validatedData.timeStart,
+    price: validatedData.price,
+    quantity: validatedData.quantity,
   };
 };
 
 const EventSchema = object({
-  email: string([
-    minLength(1, 'Please enter the student institutional email.'),
-    email('The email address is badly formatted.'),
+  description: string([
+    minLength(1, 'Please enter the event description.'),
   ]),
   id: string([
-  minLength(1, 'Please enter the Student Number'), ]),  
-course: string([
+  minLength(1, 'Please enter the event number'), ]),  
+local: string([
   minLength(1,'Student must have a course')
-]),
-role: string([
-
-]),
-locker: string([]),
-phone: string([
-  minLength(9, 'Invalid phone Number!'),
 ]),
 name: string([
   minLength(2, 'Please enter the Student name.'),
 ]),
+category: string([]),
+timeEnd: date(),
+timeStart: date(),
+price: number(),
+quantity: number(),
+
 });
 
 type EventSchema = Input<typeof EventSchema>;
@@ -120,37 +118,44 @@ type EventSchema = Input<typeof EventSchema>;
     // Await the result of useAlunos
     console.log('requestEvent:', requestEvent.params.UserId);
 
-
-
     const event: evento  = await EventoData.get(`event:${requestEvent.params.EventId}`) as evento;
     if(event == null){
       return {
         // Return the initial values for the form
-        email: "",
+        description: "",
         id: "",
-        course: "",
-        role: "",
-        locker: "",
-        phone: "",
+        img: "",
+        local: "",
         name: "",
+        category: "",
+        timeEnd: date(),
+        timeStart: date(),
+        price: 0,
+        quantity: 0,
+        isPrivate: false,
+
       }
     }
     return {
       // Return the initial values for the form
-      email: event.email,
+      description: event.description,
       id: event.id,
-      course: event.course,
-      role: event.role,
-      locker: event.locker,
-      phone: event.phone,
+      local: event.local,
       name: event.name,
+      img: event.img,
+      category: event.category,
+      timeEnd: event.timeEnd,
+      timeStart: event.timeStart,
+      price: event.price,
+      quantity: event.quantity,
+      isPrivate: event.isPrivate,
     }
   });
 
 
 
 // Define the form action using formAction$
-const addUserFormAction = formAction$<EventSchema>((values) => {
+const EventFormAction = formAction$<EventSchema>((values) => {
 
   console.log('Form submitted with:', values);
 
@@ -162,14 +167,9 @@ export default component$(() => {
     const nav = useNavigate();
     console.log('userId:', EventId);
 
-
-
-
-
-
-  const [AddUserForm, { Form, Field }] = useForm<EventSchema>({
+  const [, { Form, Field }] = useForm<EventSchema>({
     loader: useFormLoader(),
-    action: addUserFormAction(), // Ensure this is correctly defined elsewhere
+    action: EventFormAction(), // Ensure this is correctly defined elsewhere
     validate: valiForm$(EventSchema),
     
   });
@@ -257,10 +257,10 @@ export default component$(() => {
                           <label
                             for="email"
                             class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
-                          <Field name="email">
+                          <Field name="category">
                   {(field, props) => (
                     <div>
-                      <input {...props} type="email" value={field.value}
+                      <input {...props} type="text" value={field.value}
                       
                       class={`shadow-sm ${field.error ? 'border-red-600' : 'border-gray-300'} bg-gray-50 border  border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500`}/>
                       {field.error && <div class='text-red-500'>{field.error}</div>}
@@ -274,10 +274,10 @@ export default component$(() => {
                   class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                   >Student Course</label
                 >
-                <Field name="course">
+                <Field name="local">
                   {(field, props) => (
                     <div>
-                      <input {...props} type="name" value={field.value} 
+                      <input {...props} type="text" value={field.value} 
                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"/>
 
                       {field.error && <div>{field.error}</div>}
@@ -291,10 +291,10 @@ export default component$(() => {
                   class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                   >Student Role</label
                 >
-                <Field name="role">
+                <Field name="timeStart">
         {(field, props) => (
           <div>
-            <input {...props} type="name" value={field.value}
+            <input {...props} type="datetime-local" value={field.value?.toDateString()}
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"/>
             {field.error && <div>{field.error}</div>}
           </div>
@@ -307,10 +307,10 @@ export default component$(() => {
                   class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                     Student Phone Number
                   </label>
-                  <Field name="phone">
+                  <Field name="timeEnd">
         {(field, props) => (
           <div>
-            <input {...props} type="name" value={field.value}
+            <input {...props} type="datetime-local" value={field.value?.toDateString.toString()}
             class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"/>
 
             {field.error && <div>{field.error}</div>}
@@ -324,7 +324,7 @@ export default component$(() => {
                   class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                     Students Locker
                   </label>
-                  <Field name="locker">
+                  <Field name="isPrivate">
         {(field, props) => (
           <div>
             <input {...props} type="name" value={field.value}

@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "@builder.io/qwik-city";
 
 
 
-import { $, component$, useTask$, type QRL } from '@builder.io/qwik';
+import { $, component$, type QRL } from '@builder.io/qwik';
 import { routeLoader$ } from '@builder.io/qwik-city';
 import type { InitialValues, SubmitHandler } from '@modular-forms/qwik';
 import { formAction$, useForm, valiForm$ } from '@modular-forms/qwik';
@@ -291,7 +291,7 @@ export default component$(() => {
                       <input {...props} type="name" value={field.value} 
                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"/>
 
-                      {field.error && <div>{field.error}</div>}
+{field.error && <div class='text-red-500'>{field.error}</div>}
                     </div>
                   )}
                 </Field>
@@ -307,7 +307,7 @@ export default component$(() => {
           <div>
             <input {...props} type="name" value={field.value}
           class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"/>
-            {field.error && <div>{field.error}</div>}
+{field.error && <div class='text-red-500'>{field.error}</div>}
           </div>
         )}
       </Field>
@@ -324,7 +324,7 @@ export default component$(() => {
             <input {...props} type="tel" value={field.value}
             class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"/>
 
-            {field.error && <div>{field.error}</div>}
+{field.error && <div class='text-red-500'>{field.error}</div>}
           </div>
         )}
       </Field>
@@ -340,7 +340,7 @@ export default component$(() => {
           <div>
             <input {...props} type="name" value={field.value}
             class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"/>
-            {field.error && <div>{field.error}</div>}
+{field.error && <div class='text-red-500'>{field.error}</div>}
           </div>
         )}
       </Field>
